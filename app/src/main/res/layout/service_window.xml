@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    android:id="@+id/grouplayout"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:gravity="center_vertical"
+    android:layout_gravity="center_vertical"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+    <ImageView
+        android:id="@+id/icon_3"
+        android:src="@drawable/chongwutubiao23"
+        android:layout_width="30dp"
+        android:layout_height="30dp"/>
+    <LinearLayout
+        android:gravity="center_vertical"
+        android:id="@+id/location_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:id="@+id/icon_2"
+            android:src="@drawable/chongwutubiao23"
+            android:layout_width="30dp"
+            android:layout_height="30dp"/>
+        <EditText
+            android:focusable="true"
+            android:visibility="gone"
+            android:hint="22.52,113.93(经纬)"
+            android:layout_toLeftOf="@+id/icon_2"
+            android:id="@+id/happy_location"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <Button
+            android:visibility="gone"
+            android:id="@+id/sure_loc"
+            android:text="确定"
+            android:textSize="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:gravity="center_vertical"
+        android:id="@+id/ip_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:id="@+id/icon_1"
+            android:src="@drawable/chongwutubiao23"
+            android:layout_width="30dp"
+            android:layout_height="30dp"/>
+        <EditText
+            android:focusable="true"
+            android:visibility="gone"
+            android:hint="Baidu_WiFi(WIFI 名)"
+            android:id="@+id/happy_wifi_ip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <Button
+            android:visibility="gone"
+            android:id="@+id/sure_ip"
+            android:text="确定"
+            android:textSize="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+
+
+    <ImageView
+        android:id="@+id/main_icon"
+        android:src="@drawable/chongwutubiao23"
+        android:layout_width="30dp"
+        android:layout_height="30dp"/>
+</RelativeLayout>

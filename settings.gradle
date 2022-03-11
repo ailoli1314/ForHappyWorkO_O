@@ -1,0 +1,5 @@
+include ':viewsethelp'
+include ':guib_compiler'
+include ':guib_annotation'
+include ':app'
+rootProject.name='ForHappyWorkಥ_ಥ'
