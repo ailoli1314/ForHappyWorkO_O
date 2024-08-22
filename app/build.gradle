@@ -33,6 +33,7 @@ dependencies {
     implementation project(path: ':viewsethelp')
     annotationProcessor project(path: ':guib_compiler')
     implementation 'com.github.bumptech.glide:glide:3.7.0'
+    implementation 'androidx.recyclerview:recyclerview:1.2.1'
 //    implementation files('libs/guib_compiler.jar')
 //    implementation 'com.jakewharton:butterknife:8.8.1'
 //    annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'

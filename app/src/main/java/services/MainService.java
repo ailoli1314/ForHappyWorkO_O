@@ -1,10 +1,7 @@
 package services;
 
-import static androidx.core.content.ContextCompat.checkSelfPermission;
-
-import com.example.forhappywork_.MainActivity;
-import com.example.forhappywork_.R;
-import com.example.forhappywork_.windowControl;
+import com.example.forhappywork.R;
+import com.example.forhappywork.windowControl;
 
 import android.Manifest;
 import android.app.Notification;
@@ -13,7 +10,6 @@ import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -25,7 +21,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
-import androidx.annotation.Nullable;
+
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 
@@ -64,7 +60,6 @@ public class MainService extends Service {
         editor = sharedPreferences.edit();
         editor.putBoolean(serviceKey, true);
         editor.apply();
-
 
     }
 

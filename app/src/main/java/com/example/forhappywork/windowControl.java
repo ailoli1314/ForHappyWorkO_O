@@ -1,38 +1,29 @@
-package com.example.forhappywork_;
+package com.example.forhappywork;
 
 import static androidx.core.content.ContextCompat.checkSelfPermission;
 
-import java.io.IOException;
-import java.net.InetAddress;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import com.example.forhappywork.baseviewset.BaseViewSet;
 import com.example.guib_annotation.Bind;
 import com.example.guib_annotation.viewonclick;
 import com.example.viewsethelp.bindhelp.ViewSetHelp;
-import com.example.viewsethelp.bindhelp.apicenter.Api;
 
 import android.Manifest;
-import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
-import android.app.Notification;
-import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.PixelFormat;
 import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
@@ -41,8 +32,6 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Build;
-import android.os.Bundle;
-import android.os.SystemClock;
 import android.os.Vibrator;
 import android.util.Log;
 import android.view.Gravity;
@@ -59,7 +48,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 @Bind(177)
-public class windowControl {
+public class windowControl extends BaseViewSet {
 
     static windowControl mInstance = null;
     private View mPopupContentView = null;
@@ -90,7 +79,7 @@ public class windowControl {
         return mInstance;
     }
 
-    @viewonclick(R.id.grouplayout)
+    @viewonclick(id = R.id.grouplayout)
     public void test() {
         Toast.makeText(mContext, "sss", Toast.LENGTH_LONG).show();
         ViewSetHelp.getApi().to(MainActivity.class.getSimpleName()).find(122661).set("","").call();
@@ -127,12 +116,15 @@ public class windowControl {
         mWindowManager.addView(mPopupContentView, params);
         Log.e("service window", "addview 结束");
         isShown = true;
-        //locListener();// 定位监听
-        timer();
+//        timer();
     }
 
+    /**
+     * 实现了位置监听
+     * 提醒打卡
+     */
     public void timer() {
-        new Timer("开机计时器").scheduleAtFixedRate(new TimerTask() {
+        new Timer("开机计时器").schedule(new TimerTask() {
             @Override
             public void run() {
                 Log.e("gps位置监听 计时器", "ss");
@@ -152,19 +144,20 @@ public class windowControl {
     LinearLayout ipLayout, locLayout;
 
     Button sureLoc, sureIp;
+    View rootView;
 
     public View init(Context context) {
-        View view = LayoutInflater.from(context).inflate(R.layout.service_window, null);
-        icon1 = view.findViewById(R.id.icon_1);
-        icon2 = view.findViewById(R.id.icon_2);
-        icon3 = view.findViewById(R.id.icon_3);
-        location = view.findViewById(R.id.happy_location);
-        ip = view.findViewById(R.id.happy_wifi_ip);
-        ipLayout = view.findViewById(R.id.ip_layout);
-        locLayout = view.findViewById(R.id.location_layout);
-        mainIcon = view.findViewById(R.id.main_icon);
-        sureLoc = view.findViewById(R.id.sure_loc);
-        sureIp = view.findViewById(R.id.sure_ip);
+        rootView = LayoutInflater.from(context).inflate(R.layout.service_window, null);
+        icon1 = rootView.findViewById(R.id.icon_1);
+        icon2 = rootView.findViewById(R.id.icon_2);
+        icon3 = rootView.findViewById(R.id.icon_3);
+        location = rootView.findViewById(R.id.happy_location);
+        ip = rootView.findViewById(R.id.happy_wifi_ip);
+        ipLayout = rootView.findViewById(R.id.ip_layout);
+        locLayout = rootView.findViewById(R.id.location_layout);
+        mainIcon = rootView.findViewById(R.id.main_icon);
+        sureLoc = rootView.findViewById(R.id.sure_loc);
+        sureIp = rootView.findViewById(R.id.sure_ip);
 
         imageViews.add(mainIcon);
         imageViews.add(ipLayout);
@@ -178,24 +171,24 @@ public class windowControl {
         iplisten = sharedPreferences.getString(ipKey, "Baidu_WiFi|BAIDU");
         nowWifiIp = sharedPreferences.getString(lastNowWifiIp,nowWifiIp);
 
-        mainIcon.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (isOpen) {
-                    closeEnterAnim(90);
-                } else {
-                    showEnterAnim(90);
-                }
-
-
-
-                try{
-                    vibrator.cancel();
-                } catch (Exception e){
-                    e.printStackTrace();
-                }
-            }
-        });
+//        mainIcon.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                if (isOpen) {
+//                    closeEnterAnim(90);
+//                } else {
+//                    showEnterAnim(90);
+//                }
+//
+//
+//
+//                try{
+//                    vibrator.cancel();
+//                } catch (Exception e){
+//                    e.printStackTrace();
+//                }
+//            }
+//        });
 
         ipLayout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -282,66 +275,10 @@ public class windowControl {
             }
         });
 
-        return view;
+        return rootView;
     }
 
     private LocationManager locationManager;
-
-    public void locListener() {
-        locationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
-        if (checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED
-                && checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(mContext, "未开启定位权限，无法正常使用", Toast.LENGTH_LONG).show();
-            return;
-        }
-        Log.e("gps位置监听", "开启");
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0,
-                new LocationListener() {
-                    @Override
-                    public void onLocationChanged(Location location) {
-                        sleepOverTime();
-                        Log.e("gps位置监听",
-                                "onLocationChanged" + location.toString() + "lat = " + location
-                                        .getLatitude() + "lon = " + location.getLongitude());
-                        String[] strings = locString.split(",");
-                        if (strings != null && strings.length >= 2 && getDistance(Double.valueOf(strings[0]), Double.valueOf(strings[1]),
-                                location.getLongitude(), location.getLatitude()) > 100) {
-                            // 离公司 100外 米
-                            if (isclose) {
-                                // 原来在公司范围之内 提醒位置变更 记得打卡下班
-                                addDDWindow(0);
-                                return;
-                            }
-                            isclose = false;
-                        } else {
-                            if (isclose) {
-                                // 原来在公司范围之外 提醒位置变更 记得打卡上班
-                                addDDWindow(1);
-                                return;
-                            }
-                            isclose = true;
-                        }
-                        testWifiState();
-                    }
-
-                    @Override
-                    public void onStatusChanged(String provider, int status, Bundle extras) {
-                        Log.e("gps位置监听", "onStatusChanged" + provider);
-                    }
-
-                    @Override
-                    public void onProviderEnabled(String provider) {
-                        Log.e("gps位置监听", "onProviderEnabled" + provider);
-                    }
-
-                    @Override
-                    public void onProviderDisabled(String provider) {
-                        Log.e("gps位置监听", "onProviderDisabled" + provider);
-                    }
-                });
-    }
 
     /**
      * 0 - 离开公司 1 - 进入公司 2 - 连接到指定wifi 3 - 断开指定wifi
@@ -389,7 +326,7 @@ public class windowControl {
                 stateChangeTv.setText("ip变更，下班前记得打卡哦~");
                 break;
             case 4:
-                stateChangeTv.setText("9点了！！！还不起床吗，财富自由了吗，实现小目标了吗？被辞了就下海卖片去吧，loser！！！");
+                stateChangeTv.setText("9点了！！！还不起床吗？财富自由了吗？实现小目标了吗？被辞了就下海卖片去吧，loser！！！");
                 view.findViewById(R.id.dd).setVisibility(View.GONE);
                 break;
         }
@@ -724,5 +661,13 @@ public class windowControl {
     }
 
 
+    @Override
+    public void value_change(String name, Object value) {
 
+    }
+
+    @Override
+    public View rootView() {
+        return rootView;
+    }
 }

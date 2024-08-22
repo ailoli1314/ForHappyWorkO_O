@@ -7,10 +7,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- *  辅助类 GuiBhelp ：用于为不变化的 逻辑简单的 view 初始化数据展示,偷懒用的
+ *  imageview，textview填充简单内容
+ *  图片值传入url、drawable
  */
 @Target(ElementType.FIELD)
-@Retention(RetentionPolicy.CLASS)
+@Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface ViewSet {
     int id() default 0x00;
