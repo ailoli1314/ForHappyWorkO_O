@@ -87,6 +87,7 @@ public class MainService extends Service {
         editor = sharedPreferences.edit();
         editor.putBoolean(serviceKey, false);
         editor.apply();
+        windowControl.getWindowControl().destory();
     }
 
     private LocationManager locationManager;

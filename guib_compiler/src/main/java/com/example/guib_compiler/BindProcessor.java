@@ -226,10 +226,10 @@ public class BindProcessor extends AbstractProcessor {
         // 实现构造函数 初始化bind类
         binder.addMethod(createbinderConstructor(messsage));
         generateCodeApi(messsage);
-        generateCodeiViewSet(messsage);
+        generateCodeinterfaceViewSet(messsage);
     }
 
-    private void generateCodeiViewSet(ClassMesssage messsage) {
+    private void generateCodeinterfaceViewSet(ClassMesssage messsage) {
         TypeSpec.Builder binder = messsage.typeBuilder;
         String keyHead = messsage.className;
         TypeName iViewSet = ClassName.get("com.example.viewsethelp.bindhelp","iViewSet");
@@ -262,6 +262,16 @@ public class BindProcessor extends AbstractProcessor {
                 .returns(viewclass);
         rootViewMethodBuilder.addStatement("return mRootView");
         binder.addMethod(rootViewMethodBuilder.build());
+
+        MethodSpec.Builder destoryMethodBuilder = MethodSpec
+                .methodBuilder("destory")
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Override.class)
+                .returns(TypeName.VOID);
+        destoryMethodBuilder.addStatement("ViewSetHelp.unRegister(this)");
+        destoryMethodBuilder.addStatement("mContext = null");
+        destoryMethodBuilder.addStatement("mRootView = null");
+        binder.addMethod(destoryMethodBuilder.build());
     }
 
     // 初始化api消息中心
@@ -284,16 +294,32 @@ public class BindProcessor extends AbstractProcessor {
             for (Element element : elements) {
                 api bindAnnotation = element.getAnnotation(api.class);
                 Set<Modifier> modifiers = element.getModifiers();
+                boolean isPublic = false;
                 ClassName methodClass = ClassName.get("java.lang.reflect","Method");
-                methodBuilder.addStatement("if (api.what() == $L) {\n"
-                        + "    try {\n"
-                        + "        $T ms = mContext.getClass().getDeclaredMethod(\"$L\", Api.class);\n"
-                        + "        ms.setAccessible(true);\n"
-                        + "        ms.invoke(mContext, api);\n"
-                        + "    } catch (Exception e) {\n"
-                        + "        e.printStackTrace();\n"
-                        + "    }\n"
-                        + "}",bindAnnotation.what(), methodClass, element.getSimpleName());
+                ClassName contextClass = null;
+                if (modifiers.contains(Modifier.PUBLIC)) {
+                    isPublic = true;
+                    contextClass = ClassName.get(messsage.packageName,messsage.className.replace(classFoot, ""));
+                }
+                if (!isPublic || contextClass == null) {
+                    methodBuilder.addStatement("if (api.what() == $L) {\n"
+                            + "    try {\n"
+                            + "        $T ms = mContext.getClass().getDeclaredMethod(\"$L\", Api.class);\n"
+                            + "        ms.setAccessible(true);\n"
+                            + "        ms.invoke(mContext, api);\n"
+                            + "    } catch (Exception e) {\n"
+                            + "        e.printStackTrace();\n"
+                            + "    }\n"
+                            + "}",bindAnnotation.what(), methodClass, element.getSimpleName());
+                } else {
+                    methodBuilder.addStatement("if (api.what() == $L) {\n"
+                            + "    try {\n"
+                            + "        (($T)mContext).$L(api);\n"
+                            + "    } catch (Exception e) {\n"
+                            + "        e.printStackTrace();\n"
+                            + "    }\n"
+                            + "}",bindAnnotation.what(), contextClass, element.getSimpleName());
+                }
             }
         }
         binder.addMethod(methodBuilder.build());
@@ -322,41 +348,42 @@ public class BindProcessor extends AbstractProcessor {
 
                 ViewSet bindAnnotation = element.getAnnotation(ViewSet.class);
                 Set<Modifier> modifiers = element.getModifiers();
-                String L = "$L";
                 ClassName fieldClass = ClassName.get("java.lang.reflect","Field");
-                methodBuilder.addStatement(""
-                        + "try {\n"
-                        + "    $T ms = mContext.getClass().getDeclaredField(\"$L\");\n"
-                        + "    ms.setAccessible(true);\n"
-                        + "    Class<?> fieldType = ms.getType();\n"
-                        + "    Object $L = fieldType.cast(ms.get(mContext))"
-                        , fieldClass, element.getSimpleName(), element.getSimpleName());
+                boolean isPublic = false;
+                ClassName contextClass = null;
+                if (modifiers.contains(Modifier.PUBLIC)) {
+                    isPublic = true;
+                    contextClass = ClassName.get(messsage.packageName,messsage.className.replace(classFoot, ""));
+                }
+                if (!isPublic || contextClass == null) {
+                    methodBuilder.addStatement(""
+                            + "try {\n"
+                            + "    $T ms = mContext.getClass().getDeclaredField(\"$L\");\n"
+                            + "    ms.setAccessible(true);\n"
+                            + "    Class<?> fieldType = ms.getType();\n"
+                            + "    Object $L = fieldType.cast(ms.get(mContext))"
+                            , fieldClass, element.getSimpleName(), element.getSimpleName());
+                } else {
+                    methodBuilder.addStatement(""
+                                    + "try {\n"
+                                    + "    Object $L = (($T)mContext).$L"
+                            , element.getSimpleName(), contextClass, element.getSimpleName());
+                }
                 if (bindAnnotation.type() == ViewSet.ViewType.TV) {
-                    ClassName textViewClass = ClassName.get("android.widget","TextView");
-                    methodBuilder.addStatement(
-                                      "     ( ($T) mRootView.findViewById($L) ).setText(\"$L\"+"
-                                    + L +"+\"$L\");\n"
-                                    + "} catch (Exception e) {\n"
-                                    + "     e.printStackTrace();\n"
-                                    + "}",textViewClass, bindAnnotation.id()
-                            , bindAnnotation.head(), element.getSimpleName(), bindAnnotation.foot());
                     tvChange(bindAnnotation, binder, element.getSimpleName().toString(), methodNames);
-                } else if(bindAnnotation.type() == ViewSet.ViewType.IV) {
-                    ClassName imageViewClass = ClassName.get("android.widget","ImageView");
-                    ClassName glideClass = ClassName.get("com.bumptech.glide","Glide");
-                    ClassName drawableClass = ClassName.get("android.graphics.drawable","Drawable");
-                    ClassName stringClass = ClassName.get("java.lang","String");
                     methodBuilder.addStatement(
-                              "    if ($L.class.equals(fieldType)) {\n"
-                            + "      $T.with(mRootView.getContext()).load("+L+").into(($T) mRootView.findViewById($L));\n"
-                            + "    } else if ($L.class.equals(fieldType)) {\n"
-                            + "      ((ImageView) mRootView.findViewById($L)).setImageDrawable(($L) $L);\n"
-                            + "    }\n"
-                            + "} catch (Exception e) {\n"
-                            + "     e.printStackTrace();\n"
-                            + "}"
-                            ,stringClass, glideClass, element.getSimpleName(),imageViewClass,bindAnnotation.id(),drawableClass,bindAnnotation.id(),drawableClass,element.getSimpleName());
+                                      "        $L_tv_change($L);\n"
+                                    + "} catch (Exception e) {\n"
+                                    + "    e.printStackTrace();\n"
+                                    + "}", element.getSimpleName(), element.getSimpleName());
+                } else if(bindAnnotation.type() == ViewSet.ViewType.IV) {
                     ivChange(bindAnnotation, binder, element.getSimpleName().toString(), methodNames);
+                    methodBuilder.addStatement(
+                                      "        $L_iv_change($L);\n"
+                                    + "} catch (Exception e) {\n"
+                                    + "    e.printStackTrace();\n"
+                                    + "}"
+                            ,element.getSimpleName(), element.getSimpleName());
                 }
             }
         }
@@ -376,7 +403,6 @@ public class BindProcessor extends AbstractProcessor {
                 + "return;"
                 + "}");
         for (String name : methodNames) {
-
             methodBuilder.addStatement("if (name.equals(\"$L\")) { "
                     + "$L_change(value);"
                     + "}", name, name);
@@ -466,23 +492,47 @@ public class BindProcessor extends AbstractProcessor {
                 ClassName viewclass = ClassName.get("android.view","View");
                 Set<Modifier> modifiers = element.getModifiers();
                 ClassName methodClass = ClassName.get("java.lang.reflect","Method");
-                methodBuilder.addStatement("try {"
-                        + "mRootView.findViewById($L)\n"
-                        + "    .setOnClickListener(new $T.OnClickListener() {\n"
-                        + "         @Override\n"
-                        + "         public void onClick($T v) {\n"
-                        + "             try {\n"
-                        + "                  $T ms = mContext.getClass().getDeclaredMethod(\"$L\");\n"
-                        + "                  ms.setAccessible(true);\n"
-                        + "                  ms.invoke(mContext);\n"
-                        + "             } catch (Exception e) {\n"
-                        + "                  e.printStackTrace();\n"
-                        + "             }\n"
-                        + "         }\n"
-                        + "    });\n" +
-                        "} catch (Exception e) {\n"
-                        + "     e.printStackTrace();\n"
-                        + "}",bindAnnotation.id(), viewclass, viewclass, methodClass, element.getSimpleName());
+                boolean isPublic = false;
+                ClassName contextClass = null;
+                if (modifiers.contains(Modifier.PUBLIC)) {
+                    isPublic = true;
+                    contextClass = ClassName.get(messsage.packageName,messsage.className.replace(classFoot, ""));
+                }
+                if (!isPublic || contextClass == null) {
+                    methodBuilder.addStatement("try {"
+                            + "mRootView.findViewById($L)\n"
+                            + "    .setOnClickListener(new $T.OnClickListener() {\n"
+                            + "         @Override\n"
+                            + "         public void onClick($T v) {\n"
+                            + "             try {\n"
+                            + "                  $T ms = mContext.getClass().getDeclaredMethod(\"$L\");\n"
+                            + "                  ms.setAccessible(true);\n"
+                            + "                  ms.invoke(mContext);\n"
+                            + "             } catch (Exception e) {\n"
+                            + "                  e.printStackTrace();\n"
+                            + "             }\n"
+                            + "         }\n"
+                            + "    });\n" +
+                            "} catch (Exception e) {\n"
+                            + "     e.printStackTrace();\n"
+                            + "}",bindAnnotation.id(), viewclass, viewclass, methodClass, element.getSimpleName());
+                } else {
+                    methodBuilder.addStatement("try {"
+                            + "mRootView.findViewById($L)\n"
+                            + "    .setOnClickListener(new $T.OnClickListener() {\n"
+                            + "         @Override\n"
+                            + "         public void onClick($T v) {\n"
+                            + "             try {\n"
+                            + "                  (($T)mContext).$L();\n"
+                            + "             } catch (Exception e) {\n"
+                            + "                  e.printStackTrace();\n"
+                            + "             }\n"
+                            + "         }\n"
+                            + "    });\n" +
+                            "} catch (Exception e) {\n"
+                            + "     e.printStackTrace();\n"
+                            + "}",bindAnnotation.id(), viewclass, viewclass, contextClass, element.getSimpleName());
+                }
             }
 
             binder.addMethod(methodBuilder.build());

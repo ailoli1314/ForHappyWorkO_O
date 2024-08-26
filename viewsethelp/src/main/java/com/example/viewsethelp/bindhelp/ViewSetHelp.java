@@ -47,8 +47,8 @@ public class ViewSetHelp {
     }
 
     public static <T extends iViewSet, V> void valueChange(T target, V variable, V value) {
-        target.getBinder().value_change(getVariableName(target, variable), value.toString());
-        setVariableValue(target, variable, variable);
+        target.getBinder().value_change(getVariableName(target, variable), value);
+        setVariableValue(target, variable, value);
     }
 
     /**
@@ -131,5 +131,12 @@ public class ViewSetHelp {
             return;
         }
         apiCenter.unregister(key);
+    }
+
+    public static void unRegister(ApiExecutor apiExecutor) {
+        if (apiCenter == null) {
+            return;
+        }
+        apiCenter.unregister(apiExecutor.Target());
     }
 }

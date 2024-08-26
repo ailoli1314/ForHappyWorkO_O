@@ -39,7 +39,6 @@ import android.widget.Toast;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -85,7 +84,7 @@ public class MainActivity extends BaseActivity {
     @ViewSet(id = R.id.naoz, head = "tv",type = ViewSet.ViewType.TV)
     private String naoz = "闹钟⏰";
     @ViewSet(id = R.id.txt, head = "iv",type = ViewSet.ViewType.IV)
-    String dd = "test BIND iv";
+    public String dd = "test BIND iv";
     @ViewSet(id = R.id.txt, head = "tv ", foot = " foot",type = ViewSet.ViewType.TV)
     public String ss = "800";
 
@@ -158,7 +157,10 @@ public class MainActivity extends BaseActivity {
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(packageRemovedReceiver);
+        destory();
     }
+
+    public BaseAdapter adapter = new BaseAdapter(null);
 
     public void initAppList() {
         // 获取 PackageManager 实例
@@ -178,7 +180,10 @@ public class MainActivity extends BaseActivity {
                 dataList.add(new AdapterData(appIcon, appName, packageName));
             }
         }
-        BaseAdapter adapter = new BaseAdapter(dataList);
+        if (adapter != null) {
+            adapter.destoryItems();
+        }
+        adapter = new BaseAdapter(dataList);
         RecyclerView recyclerView = findViewById(R.id.recycle);
         LinearLayoutManager layoutManager = new LinearLayoutManager(MainActivity.this);
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);

@@ -19,4 +19,9 @@ public abstract class BaseViewSet implements iViewSet {
     public iViewSet getBinder() {
         return binder;
     }
+
+    @Override
+    public void destory() {
+        binder.destory();
+    }
 }

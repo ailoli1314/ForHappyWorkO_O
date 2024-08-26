@@ -32,5 +32,10 @@ public abstract class BaseAdapterViewSet implements iViewSet {
         return binder.rootView();
     }
 
+    @Override
+    public void destory() {
+        binder.destory();
+    }
+
     public abstract int layoutId();
 }

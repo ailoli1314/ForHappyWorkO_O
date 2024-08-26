@@ -15,7 +15,7 @@ import java.util.ArrayList;
 
 /**
  * Created by v_zhangguibin on 2024/8/22.
- * 通用adapter
+ * 简单的通用adapter
  * 支持不同布局的item
  * 布局展示、逻辑等操作在data中实现
  */
@@ -51,5 +51,11 @@ public class BaseAdapter extends RecyclerView.Adapter<BaseViewHolder> {
     @Override
     public int getItemCount() {
         return mData == null ? 0 : mData.size();
+    }
+
+    public void destoryItems() {
+        for (BaseAdapterViewSet viewSet : mData) {
+            viewSet.destory();
+        }
     }
 }

@@ -43,4 +43,9 @@ public abstract class BaseActivity extends AppCompatActivity implements iViewSet
         return getWindow().getDecorView();
     }
 
+    @Override
+    public void destory() {
+        binder.destory();
+    }
+
 }
