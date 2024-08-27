@@ -54,6 +54,9 @@ public class BaseAdapter extends RecyclerView.Adapter<BaseViewHolder> {
     }
 
     public void destoryItems() {
+        if (mData == null) {
+            return;
+        }
         for (BaseAdapterViewSet viewSet : mData) {
             viewSet.destory();
         }

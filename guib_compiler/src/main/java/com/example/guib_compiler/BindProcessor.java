@@ -4,7 +4,6 @@ import static com.google.auto.common.MoreElements.getPackage;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -18,17 +17,13 @@ import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
-import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
-import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.util.Elements;
-import javax.swing.text.View;
-import javax.tools.Diagnostic;
 
 import com.example.guib_annotation.Bind;
 import com.example.guib_annotation.DoSomething_logic;
@@ -38,7 +33,6 @@ import com.example.guib_annotation.setContext;
 import com.example.guib_annotation.viewonclick;
 import com.google.auto.service.AutoService;
 import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
@@ -216,20 +210,31 @@ public class BindProcessor extends AbstractProcessor {
     }
 
     /**
-     *
+     * 生成注解方法
      * @param messsage
      */
     public void generateCode(ClassMesssage messsage) {
+        String keyHead = messsage.className;
+        List<Element> elements = null;
+
         TypeSpec.Builder binder = messsage.typeBuilder;
-        generateCodeViewOnclick(messsage);
+        elements = elementHashMap.get(keyHead + viewonclick.class.getSimpleName());
+        if (elements != null && !elements.isEmpty()) {
+            generateCodeViewOnclick(messsage);
+        }
+
+        elements = elementHashMap.get(keyHead + api.class.getSimpleName());
+        if (elements != null && !elements.isEmpty()) {
+            generateCodeApi(messsage);
+        }
+
         generateCodeViewSet(messsage);
         // 实现构造函数 初始化bind类
         binder.addMethod(createbinderConstructor(messsage));
-        generateCodeApi(messsage);
-        generateCodeinterfaceViewSet(messsage);
+        generateCodeInterfaceViewSet(messsage);
     }
 
-    private void generateCodeinterfaceViewSet(ClassMesssage messsage) {
+    private void generateCodeInterfaceViewSet(ClassMesssage messsage) {
         TypeSpec.Builder binder = messsage.typeBuilder;
         String keyHead = messsage.className;
         TypeName iViewSet = ClassName.get("com.example.viewsethelp.bindhelp","iViewSet");
@@ -268,7 +273,10 @@ public class BindProcessor extends AbstractProcessor {
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Override.class)
                 .returns(TypeName.VOID);
-        destoryMethodBuilder.addStatement("ViewSetHelp.unRegister(this)");
+        List<Element> elements = elementHashMap.get(keyHead + api.class.getSimpleName());
+        if (elements != null && elements.size() > 0) {
+            destoryMethodBuilder.addStatement("ViewSetHelp.unRegister(this)");
+        }
         destoryMethodBuilder.addStatement("mContext = null");
         destoryMethodBuilder.addStatement("mRootView = null");
         binder.addMethod(destoryMethodBuilder.build());
@@ -554,7 +562,13 @@ public class BindProcessor extends AbstractProcessor {
         methodBuilder.addStatement("this.mContext = mContext");
         methodBuilder.addStatement("this.mRootView = rootView");
         ClassName methodClass = ClassName.get("com.example.viewsethelp.bindhelp","ViewSetHelp");
-        methodBuilder.addStatement("$T.register(this)", methodClass);
+
+        String keyHead = messsage.className;
+        List<Element> elements = elementHashMap.get(keyHead + api.class.getSimpleName());
+        if (elements != null && elements.size() > 0) {
+            methodBuilder.addStatement("$T.register(this)", methodClass);
+        }
+
         for (MethodSpec methodSpec : binder.build().methodSpecs) {
             if (methodSpec.name.equals("setClickListener") || methodSpec.name.equals("ViewSet")) {
                 methodBuilder.addStatement("$N()", methodSpec);
