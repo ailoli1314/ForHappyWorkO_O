@@ -31,6 +31,10 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'com.google.android.material:material:1.1.0'
 
-    api files('libs/guib_annotation.jar')
+    // jar依赖
+//    api files('libs/guib_annotation.jar')
+    // 源码依赖
+    api project(path: ':guib_annotation')
+
 //    annotationProcessor files('libs/guib_compiler.jar')
 }

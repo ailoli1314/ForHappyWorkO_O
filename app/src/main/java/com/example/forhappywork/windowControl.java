@@ -82,7 +82,7 @@ public class windowControl extends BaseViewSet {
     @viewonclick(id = R.id.grouplayout)
     public void test() {
         Toast.makeText(mContext, "sss", Toast.LENGTH_LONG).show();
-        ViewSetHelp.getApi().to(MainActivity.class.getSimpleName()).find(122661).set("","").call();
+        ViewSetHelp.getApi().to(MainActivity.class).find(122661).set("","").call();
     }
 
     public void show(Context context) {

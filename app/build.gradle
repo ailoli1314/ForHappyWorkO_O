@@ -34,10 +34,10 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
 
     // 源码依赖
-//    implementation project(path: ':viewsethelp')
-//    annotationProcessor project(path: ':guib_compiler')
+    implementation project(path: ':viewsethelp')
+    annotationProcessor project(path: ':guib_compiler')
 
     // jar包依赖
-    implementation files('libs/viewsethelp-debug.aar')
-    annotationProcessor files('libs/guib_compiler.jar')
+//    implementation files('libs/viewsethelp-debug.aar')
+//    annotationProcessor files('libs/guib_compiler.jar')
 }

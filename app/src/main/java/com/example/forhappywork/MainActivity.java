@@ -19,9 +19,11 @@ import com.example.guib_annotation.viewonclick;
 import com.example.viewsethelp.bindhelp.ViewSetHelp;
 import com.example.viewsethelp.bindhelp.apicenter.Api;
 import android.Manifest;
+import android.app.admin.DevicePolicyManager;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -44,6 +46,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
 import services.MainService;
+import services.myReceiver;
 
 @Bind(122661)
 @setContext
@@ -203,7 +206,7 @@ public class MainActivity extends BaseActivity {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if (Intent.ACTION_PACKAGE_REMOVED.equals(action)) {
-                ViewSetHelp.getApi().find(122669).to("MainActivity").call();
+                ViewSetHelp.getApi().find(122669).to(MainActivity.class).call();
                 // 处理应用卸载逻辑
                 Toast.makeText(context, "应用刷新～", Toast.LENGTH_SHORT).show();
             }
@@ -259,6 +262,14 @@ public class MainActivity extends BaseActivity {
                     122661);
         }
 
+        DevicePolicyManager dpm = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
+        ComponentName adminComponent = new ComponentName(this, myReceiver.class);
+        if (!dpm.isAdminActive(adminComponent)) {
+            Intent intent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
+            intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, adminComponent);
+            intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "请启用设备管理员权限以便更好地管理设备。");
+            startActivity(intent);
+        }
 
     }
 }

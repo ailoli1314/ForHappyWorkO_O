@@ -26,7 +26,7 @@ public abstract class BaseActivity extends AppCompatActivity implements iViewSet
 
     /**
      * 基础类型（无地址引用）及其包装类（部分包装类在某个区间有缓存机制，无地址引用），
-     * 多个变量同值的情况下，会导致修改到错误的变量方法，这里限定只接受string类型的变量
+     * 多个变量同值的情况下，会导致修改到错误的变量方法，这里限定只接受string类型（或者其他引用类型）的变量
      * @param variable
      */
     public void value_change(String variable) {

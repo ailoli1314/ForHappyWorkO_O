@@ -4,6 +4,7 @@ import com.example.forhappywork.R;
 import com.example.forhappywork.windowControl;
 
 import android.Manifest;
+import android.accessibilityservice.AccessibilityService;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -20,12 +21,13 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
+import android.view.accessibility.AccessibilityEvent;
 import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 
-public class MainService extends Service {
+public class MainService extends AccessibilityService {
 
     String serviceKey = "happy_work_servicerun";
     SharedPreferences sharedPreferences = null;
@@ -72,11 +74,6 @@ public class MainService extends Service {
         NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         assert manager != null;
         manager.createNotificationChannel(chan);
-    }
-
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
     }
 
     @Override
@@ -148,4 +145,17 @@ public class MainService extends Service {
                 });
     }
 
+    @Override
+    public void onAccessibilityEvent(AccessibilityEvent accessibilityEvent) {
+        switch (accessibilityEvent.getEventType()) {
+            case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
+                String packageName = accessibilityEvent.getPackageName().toString();
+                Log.d("AccessibilityService", "App is running: $packageName");
+        }
+    }
+
+    @Override
+    public void onInterrupt() {
+
+    }
 }

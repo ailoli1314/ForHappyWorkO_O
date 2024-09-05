@@ -26,7 +26,7 @@ import javax.lang.model.element.VariableElement;
 import javax.lang.model.util.Elements;
 
 import com.example.guib_annotation.Bind;
-import com.example.guib_annotation.DoSomething_logic;
+import com.example.guib_annotation.DoSomething;
 import com.example.guib_annotation.ViewSet;
 import com.example.guib_annotation.api;
 import com.example.guib_annotation.setContext;
@@ -86,7 +86,7 @@ public class BindProcessor extends AbstractProcessor {
         Set<String> typeSet = new LinkedHashSet<>();
 
         typeSet.add(Bind.class.getCanonicalName());
-        typeSet.add(DoSomething_logic.class.getCanonicalName());
+        typeSet.add(DoSomething.class.getCanonicalName());
         typeSet.add(setContext.class.getCanonicalName());
         typeSet.add(viewonclick.class.getCanonicalName());
         typeSet.add(ViewSet.class.getCanonicalName());
@@ -126,9 +126,9 @@ public class BindProcessor extends AbstractProcessor {
                 bindElement.add(element);
                 praseElement(element, setContext.class);
             }
-            for (Element element : roundEnv.getElementsAnnotatedWith(DoSomething_logic.class)){
+            for (Element element : roundEnv.getElementsAnnotatedWith(DoSomething.class)){
                 bindElement.add(element);
-                praseElement(element, DoSomething_logic.class);
+                praseElement(element, DoSomething.class);
             }
             for (Element element : roundEnv.getElementsAnnotatedWith(viewonclick.class)){
                 bindElement.add(element);
@@ -218,6 +218,12 @@ public class BindProcessor extends AbstractProcessor {
         List<Element> elements = null;
 
         TypeSpec.Builder binder = messsage.typeBuilder;
+
+        elements = elementHashMap.get(keyHead + DoSomething.class.getSimpleName());
+        if (elements != null && !elements.isEmpty()) {
+            generateCodeDoSomething(messsage);
+        }
+
         elements = elementHashMap.get(keyHead + viewonclick.class.getSimpleName());
         if (elements != null && !elements.isEmpty()) {
             generateCodeViewOnclick(messsage);
@@ -232,6 +238,46 @@ public class BindProcessor extends AbstractProcessor {
         // 实现构造函数 初始化bind类
         binder.addMethod(createbinderConstructor(messsage));
         generateCodeInterfaceViewSet(messsage);
+    }
+
+    public void generateCodeDoSomething(ClassMesssage messsage) {
+        TypeSpec.Builder binder = messsage.typeBuilder;
+        String keyHead = messsage.className;
+        List<Element> elements = elementHashMap.get(keyHead + DoSomething.class.getSimpleName());
+        if (elements != null && elements.size() > 0) {
+            MethodSpec.Builder methodBuilder = MethodSpec
+                    .methodBuilder("doSomething")
+                    .addModifiers(Modifier.PUBLIC)
+                    .returns(TypeName.VOID);
+            for (Element element : elements) {
+                Set<Modifier> modifiers = element.getModifiers();
+                ClassName methodClass = ClassName.get("java.lang.reflect","Method");
+                boolean isPublic = false;
+                ClassName contextClass = null;
+                if (modifiers.contains(Modifier.PUBLIC)) {
+                    isPublic = true;
+                    contextClass = ClassName.get(messsage.packageName,messsage.className.replace(classFoot, ""));
+                }
+                if (!isPublic || contextClass == null) {
+                    methodBuilder.addStatement(
+                              "try {\n"
+                            + "    $T ms = mContext.getClass().getDeclaredMethod(\"$L\");\n"
+                            + "    ms.setAccessible(true);\n"
+                            + "    ms.invoke(mContext);\n"
+                            + "} catch (Exception e) {\n"
+                            + "    e.printStackTrace();\n"
+                            + "}\n", methodClass, element.getSimpleName());
+                } else {
+                    methodBuilder.addStatement(
+                              "try {\n"
+                            + "    (($T)mContext).$L();\n"
+                            + "} catch (Exception e) {\n"
+                            + "    e.printStackTrace();\n"
+                            + "}", contextClass, element.getSimpleName());
+                }
+            }
+            binder.addMethod(methodBuilder.build());
+        }
     }
 
     private void generateCodeInterfaceViewSet(ClassMesssage messsage) {
@@ -336,8 +382,9 @@ public class BindProcessor extends AbstractProcessor {
                 .methodBuilder("Target")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Override.class)
-                .returns(String.class);
-        targetMethodBuilder.addStatement("return \"$L\"", messsage.className.replace(classFoot, ""));
+                .returns(Object.class);
+        ClassName mainClassName = ClassName.get(messsage.packageName,messsage.className.replace(classFoot, ""));
+        targetMethodBuilder.addStatement("return (($T)mContext).getClass()", mainClassName);
         binder.addMethod(targetMethodBuilder.build());
     }
 
@@ -564,7 +611,13 @@ public class BindProcessor extends AbstractProcessor {
         ClassName methodClass = ClassName.get("com.example.viewsethelp.bindhelp","ViewSetHelp");
 
         String keyHead = messsage.className;
-        List<Element> elements = elementHashMap.get(keyHead + api.class.getSimpleName());
+
+        List<Element> elements = elementHashMap.get(keyHead + DoSomething.class.getSimpleName());
+        if (elements != null && elements.size() > 0) {
+            methodBuilder.addStatement("doSomething()");
+        }
+
+        elements = elementHashMap.get(keyHead + api.class.getSimpleName());
         if (elements != null && elements.size() > 0) {
             methodBuilder.addStatement("$T.register(this)", methodClass);
         }

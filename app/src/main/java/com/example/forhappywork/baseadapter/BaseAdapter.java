@@ -22,7 +22,6 @@ import java.util.ArrayList;
 public class BaseAdapter extends RecyclerView.Adapter<BaseViewHolder> {
 
     public ArrayList<BaseAdapterViewSet> mData = null;
-    public int layoutId;
 
     public BaseAdapter(ArrayList<BaseAdapterViewSet> datas) {
         mData = datas;

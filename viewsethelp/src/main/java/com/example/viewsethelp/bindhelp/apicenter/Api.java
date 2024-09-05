@@ -5,7 +5,7 @@ import androidx.annotation.NonNull;
 
 public class Api {
     private int what;
-    private String target;
+    private Object target;
     private ArrayMap<String, Object> values;
     public  ApiCenter apiCenter;
 
@@ -39,7 +39,7 @@ public class Api {
         return api;
     }
 
-    public String target() {
+    public Object target() {
         return target;
     }
 
@@ -69,7 +69,7 @@ public class Api {
      * @param target 目标ApiExecutor对应的key
      * @return api
      */
-    public Api to(String target) {
+    public Api to(Object target) {
         this.target = target;
         return this;
     }
