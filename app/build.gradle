@@ -41,3 +41,18 @@ dependencies {
 //    implementation files('libs/viewsethelp-debug.aar')
 //    annotationProcessor files('libs/guib_compiler.jar')
 }
+
+tasks.getByPath(':viewsethelp:assembleRelease').finalizedBy(tasks.getByPath(':viewsethelp:publish'))
+tasks.getByPath(':guib_compiler:assemble').finalizedBy(tasks.getByPath(':guib_compiler:publish'))
+
+task uptogit {
+    dependsOn ':viewsethelp:assembleRelease', ':guib_compiler:assemble'
+    doLast {
+        sleep(3000)
+        println 'viewset publish to GitHub！！'
+    }
+}
+
+
+
+

@@ -1,5 +1,6 @@
 plugins {
     id 'com.android.library'
+    id("maven-publish")
 }
 
 android {
@@ -37,4 +38,34 @@ dependencies {
     api project(path: ':guib_annotation')
 
 //    annotationProcessor files('libs/guib_compiler.jar')
+}
+
+
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localProperties.load(new FileInputStream(localPropertiesFile))
+}
+
+publishing {
+    publications {
+        aar(MavenPublication) {
+            // 从 Android 库生成 AAR 文件
+            artifact("$buildDir/outputs/aar/${project.name}-release.aar")
+            groupId = 'happywork.viewset'
+            artifactId = 'viewsethelp'
+            version = project.githubVersion
+        }
+    }
+
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/ailoli1314/ForHappyWorkO_O")
+            credentials {
+                username = localProperties.getProperty("github.user")
+                password = localProperties.getProperty("github.key")
+            }
+        }
+    }
 }
