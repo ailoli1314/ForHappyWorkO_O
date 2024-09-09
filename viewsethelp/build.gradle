@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.library'
     id("maven-publish")
+    id 'com.kezong.fat-aar'
 }
 
 android {
@@ -35,7 +36,7 @@ dependencies {
     // jar依赖
 //    api files('libs/guib_annotation.jar')
     // 源码依赖
-    api project(path: ':guib_annotation')
+    embed project(path: ':guib_annotation')
 
 //    annotationProcessor files('libs/guib_compiler.jar')
 }

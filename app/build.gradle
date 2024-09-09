@@ -37,6 +37,10 @@ dependencies {
     implementation project(path: ':viewsethelp')
     annotationProcessor project(path: ':guib_compiler')
 
+    // git packages 依赖
+//    implementation 'happywork.viewset:viewsethelp:1.1.2'
+//    annotationProcessor 'happywork.viewset:guib_compiler:1.1.2'
+
     // jar包依赖
 //    implementation files('libs/viewsethelp-debug.aar')
 //    annotationProcessor files('libs/guib_compiler.jar')
